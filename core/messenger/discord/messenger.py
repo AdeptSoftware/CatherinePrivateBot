@@ -4,7 +4,6 @@ from core.messenger.discord.message     import DiscordMessage
 from core.messenger.discord.answer      import DiscordAnswer
 from core.commands.context              import ContextEx
 
-from discord.ext				        import commands
 from discord                            import Intents, Client
 
 # ======== ========= ========= ========= ========= ========= ========= =========
@@ -13,9 +12,8 @@ class DiscordMessenger(AbstractMessenger):
     def __init__(self, data, configs):
         super().__init__(data, configs)
         intents       = Intents()
-        intents.value = 32509
-        self._bot     = Client(command_prefix=configs["prefix"],
-                               loop=data.updater.loop,
+        intents.value = 32509   # На сервере вообще выдает: 3243773
+        self._bot     = Client(loop=data.updater.loop,
                                intents=intents)
         self._token   = configs["token"]
 
