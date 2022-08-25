@@ -21,7 +21,7 @@ class AbstractMessenger:
         text = ""
         if ctx:
             text = ctx.msg.text.replace('\n', ' ')
-            text = "{0}: \"{1}\"".format(ctx.msg.from_id, text)
+            text = "{0}: \"{1}\"".format(ctx.msg.chat_id, text)
         return await error(text or err)
 
     # Уникальный идентификатор (см. выше: Message Types)

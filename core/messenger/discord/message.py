@@ -4,11 +4,12 @@ from core.messenger.message import AbstractMessage
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 class DiscordMessage(AbstractMessage):
-    def __init__(self, ctx, fwd=True):
+    def __init__(self, ctx, fwd=True, appeal=False):
         super().__init__()
-        self._text = ctx.content
-        self._ctx  = ctx
-        self._fwd  = []                  # Не поддерживается
+        self._text   = ctx.content
+        self._appeal = appeal
+        self._ctx    = ctx
+        self._fwd    = []
 
         if fwd and self._ctx.reference:
             self._fwd += [DiscordMessage(self._ctx.reference.resolved, False)]

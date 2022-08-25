@@ -5,7 +5,7 @@ import re
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 # Регулярное выражение для разбивки сообщения на части
-_parts = re.compile(r"[\w\d][-\w\d]+|[_\w\d]+|\[id\d+\|.+?]|@[_\w\d]+")
+_parts = re.compile(r"[\w\d][-\w\d]+|[_\w\d]+|\[id\d+\|.+?]|@[_\w\d]+|<@\d+>")
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
@@ -75,9 +75,16 @@ class MessageParser:
 
     # Проверка обращения в тексте и пересланных сообщениях
     def __appeal(self, lst, names, bot_id):
+        # Обращение через текст: Catherine, ...
         for start, end in TextList.boundary(lst):
             self._mark(lst, start, +1, names)
             self._mark(lst, end,   -1, names)
+        # Обращение через упоминание: @
+        for i in range(len(lst)):
+            if lst[i] and str(bot_id) in lst[i]:
+                self._appeal = True
+                lst[i]       = None
+        # Обращение через пересланное сообщение
         if not self._appeal:
             for msg in self._fwd:
                 if msg.from_id == bot_id:

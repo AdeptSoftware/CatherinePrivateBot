@@ -12,8 +12,7 @@ from discord                            import Intents
 class DiscordMessenger(AbstractMessenger):
     def __init__(self, data, configs):
         super().__init__(data, configs)
-        intents       = Intents(messages=True, guild_messages=True, guilds=True)
-        # intents.value = 32509   # На сервере вообще выдает: 3243773
+        intents       = Intents(messages=True, guilds=True)
         self._bot     = commands.Bot(command_prefix=configs["prefix"],
                                      loop=data.updater.loop,
                                      intents=intents)
@@ -21,11 +20,17 @@ class DiscordMessenger(AbstractMessenger):
 
         @self._bot.event
         async def on_message(item):
+            # К сожалению, с 31.08.2022 вступает в силу ограничение
+            # Команды бота доступны либо через @self._bot.command()
+            # Либо если есть упоминание бота / пересланное сообщение
+            # Ограничение можно снять, если бот будет на >= 100 серверах
             ctx = None
             try:
+                if item.content is None:
+                    return
                 ctx = ContextEx(
                     self._ctx,
-                    DiscordMessage(item),
+                    DiscordMessage(item, appeal=True),
                     DiscordAnswer(item.guild.id)
                 )
                 if await ctx.mngr.on_message(ctx):

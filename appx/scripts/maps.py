@@ -39,7 +39,7 @@ async def place(latitude, longitude):
             "lat":   lat,
             "lng":   lng,
             "url":   url,
-            "place": data[1],
+            "place": str(data[1]),
             "img":   data[2],
             "sz":    data[3]
         }

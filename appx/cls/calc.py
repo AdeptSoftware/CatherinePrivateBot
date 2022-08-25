@@ -50,6 +50,8 @@ class Calculator:
             return eval(self._expr)
         except SyntaxError:
             return None
+        except AttributeError:
+            return None
 
     def _check(self):
         offset = 0

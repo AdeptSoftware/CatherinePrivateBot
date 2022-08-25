@@ -258,7 +258,7 @@ async def how(ctx: _ctx.ContextEx):
     return ctx.lang["$HOW"] in ctx.msg.items
 
 async def any_q(ctx: _ctx.ContextEx):
-    return ctx.msg.text[-1] == '?'
+    return ctx.msg.text and ctx.msg.text[-1] == '?'
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
