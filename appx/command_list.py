@@ -290,8 +290,12 @@ def _set(ctx: _ctx.ContextEx):
     ctx.ans.set_text(ctx.data)
 
 def _where(ctx: _ctx.ContextEx):
-    ctx.ans.set_text(ctx.data["place"])
-    ctx.ans.set_image(ctx.data["img"])
+    if type(ctx.data) is dict:
+        print(ctx.data)
+        ctx.ans.set_text(ctx.data["place"])
+        ctx.ans.set_image(ctx.data["img"])
+    else:
+        ctx.ans.set_text(ctx.data)
 
 def _who(ctx: _ctx.ContextEx):
     lst = ctx.lang["=WHO"]
