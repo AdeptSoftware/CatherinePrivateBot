@@ -305,9 +305,9 @@ def _who(ctx: _ctx.ContextEx):
 
 def attach():
     #        condition  answer_key  cd  lim      access_type          name
-    _cmd.new(hello,     _hello,     300, 0, _cmd.ACCESS_PERSONAL,     name="Hello",      appeal=False)
-    _cmd.new(goodbye,   "=GOODBYE", 300, 0, _cmd.ACCESS_PERSONAL,     name="Goodbye",    appeal=False)
-    _cmd.new(sleep,     "=SLEEP",   300, 0, _cmd.ACCESS_PERSONAL,     name="Sleep",      appeal=False)
+    _cmd.new(hello,     _hello,     300, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Hello",      appeal=False)
+    _cmd.new(goodbye,   "=GOODBYE", 300, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Goodbye",    appeal=False)
+    _cmd.new(sleep,     "=SLEEP",   300, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Sleep",      appeal=False)
     # Уникальные команды
     _cmd.new(calculate, _join,        0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Calculate")
     _cmd.new(acronym,   _set,         0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Acronym")
