@@ -43,7 +43,6 @@ async def place(latitude, longitude):
             "img":   data[2],
             "sz":    data[3]
         }
-    print(content+'\n'+url)
 
 def rnd_pos(_min, _max):
     return (random.random()*(_max-_min))+_min
