@@ -5,17 +5,15 @@ from core.messenger.discord.answer      import DiscordAnswer
 from core.commands.context              import ContextEx
 
 from discord.ext				        import commands
-from discord                            import Intents
+from discord                            import Intents, Client
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 class DiscordMessenger(AbstractMessenger):
     def __init__(self, data, configs):
         super().__init__(data, configs)
-        intents = Intents(guilds=True, messages=True)
-        self._bot = commands.Bot(command_prefix=configs["prefix"],
-                                 loop=data.updater.loop,
-                                 intents=intents)
+        self._bot   = Client(command_prefix=configs["prefix"],
+                             loop=data.updater.loop)
         self._token = configs["token"]
 
         @self._bot.event
