@@ -12,8 +12,11 @@ from discord                            import Intents, Client
 class DiscordMessenger(AbstractMessenger):
     def __init__(self, data, configs):
         super().__init__(data, configs)
+        intents     = Intents().default()
+        print(intents.value)
         self._bot   = Client(command_prefix=configs["prefix"],
-                             loop=data.updater.loop)
+                             loop=data.updater.loop,
+                             intents=intents)
         self._token = configs["token"]
 
         @self._bot.event
