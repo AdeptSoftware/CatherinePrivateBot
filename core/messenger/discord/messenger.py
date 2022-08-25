@@ -12,9 +12,9 @@ from discord                            import Intents
 class DiscordMessenger(AbstractMessenger):
     def __init__(self, data, configs):
         super().__init__(data, configs)
-        self._bot   = commands.Bot(command_prefix=configs["prefix"],
-                                   intents=Intents.default(),
-                                   loop=data.updater.loop)
+        self._bot = commands.Bot(command_prefix=configs["prefix"],
+                                 loop=data.updater.loop,
+                                 intents=Intents().default())
         self._token = configs["token"]
 
         @self._bot.event
