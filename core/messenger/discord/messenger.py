@@ -12,8 +12,7 @@ from discord                            import Intents
 class DiscordMessenger(AbstractMessenger):
     def __init__(self, data, configs):
         super().__init__(data, configs)
-        intents = Intents().default()
-        intents.messages = True
+        intents = Intents(guilds=True, messages=True)
         self._bot = commands.Bot(command_prefix=configs["prefix"],
                                  loop=data.updater.loop,
                                  intents=intents)
