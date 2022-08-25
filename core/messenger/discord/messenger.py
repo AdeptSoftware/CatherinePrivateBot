@@ -5,7 +5,7 @@ from core.messenger.discord.answer      import DiscordAnswer
 from core.commands.context              import ContextEx
 
 from discord.ext				        import commands
-from core.updater                       import error
+from discord                            import Intents
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
@@ -13,6 +13,7 @@ class DiscordMessenger(AbstractMessenger):
     def __init__(self, data, configs):
         super().__init__(data, configs)
         self._bot   = commands.Bot(command_prefix=configs["prefix"],
+                                   intents=Intents.default(),
                                    loop=data.updater.loop)
         self._token = configs["token"]
 
