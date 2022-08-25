@@ -12,12 +12,12 @@ from discord                            import Intents, Client
 class DiscordMessenger(AbstractMessenger):
     def __init__(self, data, configs):
         super().__init__(data, configs)
-        intents     = Intents().default()
-        print(intents.value)
-        self._bot   = Client(command_prefix=configs["prefix"],
-                             loop=data.updater.loop,
-                             intents=intents)
-        self._token = configs["token"]
+        intents       = Intents()
+        intents.value = 32509
+        self._bot     = Client(command_prefix=configs["prefix"],
+                               loop=data.updater.loop,
+                               intents=intents)
+        self._token   = configs["token"]
 
         @self._bot.event
         async def on_message(item):
