@@ -12,14 +12,14 @@ class DialogFlowCommandState(ICommandState):
         self._handler   = handler
         self._list      = []
 
-    def new_state(self, node, now):
+    def new_state(self, node, user_id, now):
         for state in self._list:
             if state.name == node.name:
-                state.new_state(node, now)
+                state.new_state(node, user_id, now)
                 self._last = state
                 return
         self._last = CommandState(node, now)
-        self._last.new_state(node, now)
+        self._last.new_state(node, user_id, now)
         self._list += [self._last]
 
     def state(self, now):
@@ -27,9 +27,19 @@ class DialogFlowCommandState(ICommandState):
         # Так как при нормальных условиях до этого не должно дойти!
         return self._last.state(now)
 
+    def has_user(self, user_id):
+        for state in self._list:
+            if state.has_user(user_id):
+                return True
+        return False
+
     @property
     def name(self):
         return self._last.name
+
+    @property
+    def count(self):
+        return self._last.count
 
     def update(self, expired):
         deleted = []
@@ -98,11 +108,14 @@ class DialogFlowCommand(ICommand):
     def access_type(self):
         if self.__name__ in self._data:
             return self._data[self.__name__][0]
-        return ACCESS_ALL_AT_ONCE
+        return ACCESS_PERSONAL
 
     @property
     def name(self):
         return self.__name__
+
+    def on_enter(self):
+        self.__name__ = ""
 
     def create_state(self, now) -> ICommandState:
         return DialogFlowCommandState(self.check, now)

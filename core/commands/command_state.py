@@ -11,7 +11,10 @@ STATE_READY               = 3             # Команда доступна
 
 # Определяет и управляет текущим состоянием команды
 class ICommandState:
-    def new_state(self, node, now):
+    def new_state(self, node, user_id, now):
+        pass
+
+    def has_user(self, user_id):
         pass
 
     def state(self, now):
@@ -20,6 +23,10 @@ class ICommandState:
     @property
     def name(self):
         return ""
+
+    @property
+    def count(self):
+        return 0
 
     def update(self, expired):
         pass
@@ -35,16 +42,23 @@ class CommandState(ICommandState):
         self._count     = 0            # Количество использований команды
         self._prev      = 0            # Время предпоследнего вызова
         self._last      = now          # Время последнего вызова
+        self._users     = []
 
-    def new_state(self, node, now):
+    def new_state(self, node, user_id, now):
         if self._node.name != node.name:
             self._count = 0
             self._last  = now
+
+        if user_id not in self._users:
+            self._users += [user_id]
 
         self._prev      = self._last
         self._node      = node
         self._last      = now
         self._count    += 1
+
+    def has_user(self, user_id):
+        return user_id in self._users
 
     def state(self, now):
         if self._node.limit:
@@ -67,6 +81,10 @@ class CommandState(ICommandState):
     @property
     def name(self):
         return self._node.name
+
+    @property
+    def count(self):
+        return self._count
 
     async def search(self, ctx):
         node = await self._node.check(ctx)

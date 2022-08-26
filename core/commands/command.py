@@ -5,17 +5,18 @@ from core.commands.command_state    import CommandState, ICommandState
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 # Типы доступа пользователей к команде
-ACCESS_USER                 = 0             # Default: обычный пользователь
-ACCESS_PERSONAL             = 0             # Отвечает каждому по отдельности
-ACCESS_ALL_AT_ONCE          = 1             # Отвечает всем сразу
-ACCESS_OCCUPIED             = 2             # Отвечает только одному
-ACCESS_MODERATOR            = 3             # Отвечает только модерам
-ACCESS_ADMIN                = 4             # Отвечает только админам
+ACCESS_LOCK                 = -1    # Блокирует команду на время после использования
+ACCESS_USER                 = 0     # Default: обычный пользователь
+ACCESS_PERSONAL             = 0     # Отвечает каждому по отдельности
+ACCESS_ALL_AT_ONCE          = 1     # Отвечает всем сразу
+ACCESS_OCCUPIED             = 2     # Отвечает только одному
+ACCESS_MODERATOR            = 3     # Отвечает только модерам
+ACCESS_ADMIN                = 4     # Отвечает только админам
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 _COMMANDS   = []    # Общий список команд, доступный всем мессенджерам
-_DEFAULT_RT = 60    # Значение времени запоминания по умолчанию
+_DEFAULT_RT = 20    # Значение времени запоминания по умолчанию
 
 # регистрирует команду
 def add(cmd):
@@ -53,6 +54,9 @@ class ICommand:
     @property
     def name(self):
         return ""
+
+    def on_enter(self): # Опциональное
+        pass
 
     def create_state(self, now) -> ICommandState:
         pass

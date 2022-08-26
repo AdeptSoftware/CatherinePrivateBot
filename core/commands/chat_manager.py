@@ -42,7 +42,7 @@ class ChatManager:
     def has_dialog(self, user_id):
         """ Пользователь уже ведёт диалог с нами """
         for cmd in self._commands:
-            if cmd.has_dialog(user_id):
+            if cmd.index(user_id) is not None:
                 return True
         return False
 

@@ -1,29 +1,15 @@
 from core.commands.command       import ACCESS_ADMIN, ACCESS_MODERATOR, ACCESS_ALL_AT_ONCE, \
-                                        ACCESS_OCCUPIED, ICommand
+                                        ACCESS_OCCUPIED, ACCESS_LOCK, ICommand
 from core.commands.command_state import STATE_OVERLIMIT, STATE_ACCESS_DENIED
 from core.safe                   import SafeVariable
 from core.commands.context       import ContextEx
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
-
-class _State:
-    def __init__(self, node, now):
-        self._node  = node          # Текущий ICommandNode
-        self._count = 0             # Количество использований команды
-        self._prev  = now           # Время предпоследнего вызова
-        self._last  = 0             # Время последнего вызова
-
-    async def search(self, ctx):
-        return await self._node.check(ctx) or await self._node.find(ctx)
-
-
-# ======== ========= ========= ========= ========= ========= ========= =========
-
 # Безопасно управляет командами, отслеживает действия пользователей
 class ChatCommand:
     def __init__(self, cmd: ICommand):
-        self._states = SafeVariable({})
+        self._states = SafeVariable([])
         self._cmd    = cmd
 
     @property
@@ -41,22 +27,27 @@ class ChatCommand:
             return user_access_type >= ACCESS_MODERATOR
         return True
 
-    def has_dialog(self, user_id):
-        """ Пользователь(и) уже ведёт диалог с нами? """
-        if self._cmd.access_type == ACCESS_ALL_AT_ONCE:
-            user_id = 0
-        with self._states:
-            return user_id in self._states.value
+    def index(self, user_id):
+        # Защищать self._states извне!
+        for i in range(len(self._states)):
+            if self._states[i].has_user(user_id):
+                return i
+        return None
+
+    def _pop(self, index=None):
+        if index is None or index >= len(self._states):
+            return None
+        return self._states.pop(index)
 
     def update(self, now):
         deleted = []
         rt = self._cmd.remember_time
         with self._states:
-            for user_id in self._states.value:
-                if not self._states[user_id].update(now-rt):
-                    deleted += [user_id]
-            for user_id in deleted:
-                self._states.pop(user_id)
+            for i in range(len(self._states)):
+                if not self._states[i].update(now-rt):
+                    deleted += [i]
+            for i in deleted:
+                self._states.pop(i)
 
     def status(self, now, user_id):
         """ Проверка статуса команды для текущего пользователя
@@ -70,36 +61,34 @@ class ChatCommand:
         :param user_id: ID пользователя
         :return: Код-статус, обозначающий готовность команды
         """
-        if self._cmd.access_type == ACCESS_ALL_AT_ONCE:
-            user_id = 0
         with self._states:
             # Если команда оккупирована другим пользователем и он не 1 в списке
-            if self._cmd.access_type == ACCESS_OCCUPIED and \
-               user_id != list(self._states.keys())[0]:
-                if self._states[user_id].count > 1:
+            index = self.index(user_id)
+            if self._cmd.access_type == ACCESS_OCCUPIED and index != 0:
+                if self._states[index].count > 1:
                     return STATE_OVERLIMIT    # Уже оповестили о том, что:
                 return STATE_ACCESS_DENIED    # Используется другим user'ом
-            return self._states[user_id].state(now)
+            return self._states[index].state(now)
 
     async def check(self, now, ctx: ContextEx):
         """ Поиск ответа среди команд """
-        state = self._cmd.create_state(now)
-        with self._states:
-            for _id in (ctx.msg.from_id, 0):
-                if _id in self._states.value:
-                    state = self._states[_id]
-                    break
-        # Проверка команды
-        node = await state.search(ctx)
-        if node:
-            state.new_state(node, now)
-            # Сохранение нового состояния
-            from_id = 0
-            if self._cmd.access_type != ACCESS_ALL_AT_ONCE:
-                from_id = ctx.msg.from_id
-            with self._states:
-                self._states[from_id] = state
-            return node
+        user_id = ctx.msg.from_id
+        with self._states:  # Узкое место... Надо в будущем придумать что-нибудь
+            self._cmd.on_enter()
+            if self._cmd.access_type == ACCESS_LOCK and self._states:
+                return None
+            index = self.index(user_id)
+            if index is None and self._cmd.access_type == ACCESS_ALL_AT_ONCE:
+                index = 0
+            state = self._pop(index) or self._cmd.create_state(now)
+            node = await state.search(ctx)
+            if node:
+                if not self._states or self._cmd.access_type != ACCESS_ALL_AT_ONCE:
+                    state.new_state(node, user_id, now)
+                    self._states.insert(index or len(self._states), state)
+                else:
+                    self._states[0].new_state(node, user_id, now)
+                return node
         return None
 
 # ======== ========= ========= ========= ========= ========= ========= =========

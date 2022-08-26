@@ -75,15 +75,19 @@ async def date(ctx: _ctx.ContextEx):
     result = ctx.msg.items.has_phrases(ctx.lang["#DATE"], False)
     if result:
         delta = 0
+        flag  = True
         time_offset = ctx.lang["TIME_OFFSET"]
         for word in ctx.msg.items:
             if word in time_offset:
                 delta = time_offset.index(word)-2
+                flag  = False
                 break
         now  = _upd.time()+datetime.timedelta(days=delta)
         plus = '+'*(_upd.G_TIMEZONE >= 0)
-        ctx.data = now.strftime("%d/%m/%Y %H:%M")
-        ctx.data += " (UTC {0}{1}:00)".format(plus, _upd.G_TIMEZONE)
+        fmt = "%d/%m/%Y" + " %H:%M"*int(flag)
+        ctx.data = now.strftime(fmt)
+        if flag:
+            ctx.data += " (UTC {0}{1}:00)".format(plus, _upd.G_TIMEZONE)
         return True
     return False
 
@@ -291,7 +295,6 @@ def _set(ctx: _ctx.ContextEx):
 
 def _where(ctx: _ctx.ContextEx):
     if type(ctx.data) is dict:
-        print(ctx.data)
         ctx.ans.set_text(ctx.data["place"])
         ctx.ans.set_image(ctx.data["img"])
     else:
@@ -305,35 +308,34 @@ def _who(ctx: _ctx.ContextEx):
 
 def attach():
     #        condition  answer_key  cd  lim      access_type          name
-    _cmd.new(hello,     _hello,     300, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Hello",      appeal=False)
-    _cmd.new(goodbye,   "=GOODBYE", 300, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Goodbye",    appeal=False)
-    _cmd.new(sleep,     "=SLEEP",   300, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Sleep",      appeal=False)
+    _cmd.new(hello,     _hello,     120, 0, _cmd.ACCESS_LOCK,         name="Hello",      appeal=False)
+    _cmd.new(goodbye,   "=GOODBYE", 120, 0, _cmd.ACCESS_LOCK,         name="Goodbye",    appeal=False)
+    _cmd.new(sleep,     "=SLEEP",   120, 0, _cmd.ACCESS_LOCK,         name="Sleep",      appeal=False)
     # Уникальные команды
-    _cmd.new(calculate, _join,        0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Calculate")
-    _cmd.new(acronym,   _set,         0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Acronym")
+    _cmd.new(calculate, _join,        0, 0, _cmd.ACCESS_PERSONAL,     name="Calculate")
+    _cmd.new(acronym,   _set,         0, 0, _cmd.ACCESS_PERSONAL,     name="Acronym")
     _cmd.new(date,      _set,       600, 1, _cmd.ACCESS_ALL_AT_ONCE,  name="Date")       # Перед HowMuch
-    _cmd.new(hit,       _set,         0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Hit")
-    _cmd.new(is_true,   "=IS_TRUE",   0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="IsTrue")
-    _cmd.new(repeat,    _set,         0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Repeat")
-    _cmd.new(variants,  _set,         0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Variants")   # Перед Who
+    _cmd.new(hit,       _set,         0, 0, _cmd.ACCESS_PERSONAL,     name="Hit")
+    _cmd.new(is_true,   "=IS_TRUE",   0, 0, _cmd.ACCESS_PERSONAL,     name="IsTrue")
+    _cmd.new(repeat,    _set,         0, 0, _cmd.ACCESS_PERSONAL,     name="Repeat")
+    _cmd.new(variants,  _set,         0, 0, _cmd.ACCESS_PERSONAL,     name="Variants")   # Перед Who
     # Тук-тук -> Кто там? -> Сто грамм -> Очень смешно...
     _cmd.new(knock_0,   "=KNOCK",     0, 1, _cmd.ACCESS_PERSONAL, 20, name="KnockKnock", nodes=[
         _cmd.CommandNode(knock_any, "=KNOCK_ANY", 20, 0)
     ])
+    # Общие вопросы:
+    _cmd.new(how_much,  _set,         0, 0, _cmd.ACCESS_PERSONAL,     name="HowMuch")
+    _cmd.new(where,     _where,       0, 0, _cmd.ACCESS_PERSONAL,     name="Where")
+    _cmd.new(when,      _set,         0, 0, _cmd.ACCESS_PERSONAL,     name="When")
+    _cmd.new(who,       _who,         0, 0, _cmd.ACCESS_PERSONAL,     name="Who")
+    _cmd.new(which,     "=WHICH",     0, 0, _cmd.ACCESS_PERSONAL,     name="Which")
+    _cmd.new(whom,      "=WHOM",      0, 0, _cmd.ACCESS_PERSONAL,     name="Whom")
+    _cmd.new(how,       "=HOW",       0, 0, _cmd.ACCESS_PERSONAL,     name="How")        # После HowMuch
+    _cmd.new(why,       "=WHY",       0, 0, _cmd.ACCESS_PERSONAL,     name="Why")
     # DialogFlow
     _cmd.add(_dlg.DialogFlowCommand(name="DialogFlow"))
-    # Общие вопросы:
-    _cmd.new(how_much,  _set,         0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="HowMuch")
-    _cmd.new(where,     _where,       0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Where")
-    _cmd.new(when,      _set,         0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="When")
-    _cmd.new(who,       _who,         0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Who")
-
-    _cmd.new(which,     "=WHICH",     0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Which")
-    _cmd.new(whom,      "=WHOM",      0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Whom")
-    _cmd.new(how,       "=HOW",       0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="How")        # После HowMuch
-    _cmd.new(why,       "=WHY",       0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="Why")
     # Рандомный вопрос. Попытка ответить
-    _cmd.new(any_q,    "=ANY_Q",      0, 0, _cmd.ACCESS_ALL_AT_ONCE,  name="AnyQuestion")# После всех!
+    _cmd.new(any_q,    "=ANY_Q",      0, 0, _cmd.ACCESS_PERSONAL,     name="AnyQuestion")# После всех!
 
 def dialogflow_init(configs):
     for cmd in _cmd.get_commands():
