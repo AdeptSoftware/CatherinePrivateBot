@@ -25,7 +25,7 @@ def timetable(event: Event):
 		event.reserve = None
 	# Определение времени отправки следующего сообщения (z)
 	days = 0
-	offset = data["timezone"]-timezone()
+	offset = timezone()+data["offset"]
 	now = datetime.datetime.now() + datetime.timedelta(hours=offset)
 	while days < 8:			# Неделя+1
 		for msg in data["lst"]:
