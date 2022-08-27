@@ -97,7 +97,10 @@ class DialogFlowCommand(ICommand):
             "UPurpose":         (ACCESS_PERSONAL,       5, 1)
         }
         self._blocked = (
-            "WhereIt",
+            "smalltalk.greetings.goodnight",
+            "smalltalk.greetings.hello",
+            "smalltalk.greetings.bye",
+            "WhereIt"
         )
 
     def initialize(self, configs):

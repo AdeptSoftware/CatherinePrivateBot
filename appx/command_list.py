@@ -135,7 +135,7 @@ async def variants(ctx: _ctx.ContextEx):
             start = end+1
         if parts:
             ctx.data = _rnd.rnd_list(parts)
-            if ctx.data in ctx.lang["CATHERINE"] or ctx.lang["$ME"] in ctx.data:
+            if ctx.data in ctx.lang["CATHERINE"] or ctx.lang["$ME"] == ctx.data:
                 ctx.data = ctx.lang["$YOU"]
             ctx.data = ctx.data[0].upper() + ctx.data[1:]
             return True
@@ -165,6 +165,9 @@ async def hit(ctx: _ctx.ContextEx):
                             ctx.data = _list[i].inflect({"nomn", "sing"}).word
                             ctx.data = ctx.data.capitalize()
                             break
+                    elif "LATN" in _list[i].tag:
+                        ctx.data = _list[i].text.capitalize()
+                        break
                     elif _list[i] in _self or _list[i] == _all:
                         ctx.data = ctx.lang.rnd("=NO_HIT")
                         return True
