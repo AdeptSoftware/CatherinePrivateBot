@@ -101,7 +101,7 @@ class MessageParser:
         while 0 <= index < length and lst[index] and not lst[index].isalnum():
             index += offset
         # Могли установить в None ранее
-        if lst[index] and lst[index].lower() in names:
+        if 0 <= index < length and lst[index] and lst[index].lower() in names:
             lst[index] = None
             index += offset
             if 0 <= index < length and ',' in lst[index]:

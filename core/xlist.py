@@ -1,5 +1,5 @@
 #
-import pymorphy2
+import pymorphy2 # http://opencorpora.org/dict.php?act=gram
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
@@ -118,14 +118,25 @@ class TextList:
                     return phrase
         return None
 
-    def get(self, start=0, end=None):
-        """ Выдаёт строку по индексу слов/символов """
+    def get(self, start=0, end=None, ignore_parasite=False):
+        """ Выдаёт строку по индексу слов/символов
+
+        :param start: индекс начала
+        :param end: индекс конца
+        :param ignore_parasite: слова-паразиты - междометия
+        """
         res = ""
-        for i in range(start, end or len(self._list)):
-            text = self._list[i].text
-            if res and (text.isalpha() or text == '-' or text.isdigit()):
-                res += ' '
-            res += text
+        i   = start
+        end = end or len(self._list)
+        while i < end:
+            if not ignore_parasite or "INTJ" not in self._list[i].tag:
+                text = self._list[i].text
+                if res and (text.isalpha() or text == '-' or text.isdigit()):
+                    res += ' '
+                res += text
+            elif i+1 < end and "PNCT" not in self._list[i].tag:
+                i += 1
+            i += 1
         return res
 
     @property

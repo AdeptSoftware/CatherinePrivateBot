@@ -100,7 +100,8 @@ class DialogFlowCommand(ICommand):
             "smalltalk.greetings.goodnight",
             "smalltalk.greetings.hello",
             "smalltalk.greetings.bye",
-            "WhereIt"
+            "WhereIt",
+            "None"
         )
 
     def initialize(self, configs):
@@ -125,7 +126,7 @@ class DialogFlowCommand(ICommand):
 
     async def check(self, ctx):
         if ctx.msg.items:
-            result = self._agent.detect(ctx.msg.items.get())
+            result = self._agent.detect(ctx.msg.items.get(ignore_parasite=True))
             if result and result["score"] >= self._threshold:
                 if result["action"] in self._blocked:
                     return None

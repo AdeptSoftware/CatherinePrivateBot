@@ -53,7 +53,7 @@ class ChatManager:
             return ACCESS_MODERATOR
         return ACCESS_USER
 
-    def get(self):
+    def get(self):  # Проверить, что оно копируется нормально
         return {
             "admins":       self._admins.copy(),
             "blacklist":    self._blacklist.copy(),

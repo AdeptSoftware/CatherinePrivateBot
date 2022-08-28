@@ -128,14 +128,16 @@ async def variants(ctx: _ctx.ContextEx):
         start = int(_list[0].lower in ctx.lang["$WHO"] or
                     _list[0].lower in ctx.lang["$WHAT"])
         while True:
-            end = _list.find(_or, start, index=True)
-            parts += [ctx.msg.items.get(start, end or len(_list))]
+            end    = _list.find(_or, start, index=True)
+            text   = ctx.msg.items.get(start, end or len(_list))
+            parts += [text.replace('?', '')]
             if end is None:
                 break
-            start = end+1
-        if parts:
+            start  = end+1
+        parts = list(filter(None, parts))
+        if len(parts) > 1:
             ctx.data = _rnd.rnd_list(parts)
-            if ctx.data in ctx.lang["CATHERINE"] or ctx.lang["$ME"] == ctx.data:
+            if ctx.lang["CATHERINE"] or ctx.lang["$ME"] == ctx.data:
                 ctx.data = ctx.lang["$YOU"]
             ctx.data = ctx.data[0].upper() + ctx.data[1:]
             return True
@@ -184,7 +186,7 @@ async def hit(ctx: _ctx.ContextEx):
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 async def where(ctx: _ctx.ContextEx):
-    if ctx.lang["$WHERE"] in ctx.msg.items:
+    if ctx.msg.items and ctx.lang["$WHERE"] == ctx.msg.items[0]:
         for attempt in range(5):
             result = await _maps.rnd_place()
             if result:
@@ -333,10 +335,11 @@ def attach():
     _cmd.new(who,       _who,         0, 0, _cmd.ACCESS_PERSONAL,     name="Who")
     _cmd.new(which,     "=WHICH",     0, 0, _cmd.ACCESS_PERSONAL,     name="Which")
     _cmd.new(whom,      "=WHOM",      0, 0, _cmd.ACCESS_PERSONAL,     name="Whom")
-    _cmd.new(how,       "=HOW",       0, 0, _cmd.ACCESS_PERSONAL,     name="How")        # После HowMuch
     _cmd.new(why,       "=WHY",       0, 0, _cmd.ACCESS_PERSONAL,     name="Why")
     # DialogFlow
     _cmd.add(_dlg.DialogFlowCommand(name="DialogFlow"))
+    # После HowMuch и DialogFlow
+    _cmd.new(how,       "=HOW",       0, 0, _cmd.ACCESS_PERSONAL,     name="How")
     # Рандомный вопрос. Попытка ответить
     _cmd.new(any_q,    "=ANY_Q",      0, 0, _cmd.ACCESS_PERSONAL,     name="AnyQuestion")# После всех!
 
