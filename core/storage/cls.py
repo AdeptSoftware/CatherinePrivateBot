@@ -10,9 +10,10 @@ FILE_ENCODING = "utf-8"
 
 # Все файлы, привязанные к таким объектам должны существовать на момент создания
 class AbstractStorageObject:
-	def __init__(self, path, default):
-		self._obj  = SafeVariable(default)
-		self._path = path
+	def __init__(self, path, immutable=False, default=""):
+		self._obj  		= SafeVariable(default)
+		self._immutable = immutable
+		self._path 		= path
 		self.restore()
 	
 	def get(self) -> SafeVariable:
@@ -20,6 +21,8 @@ class AbstractStorageObject:
 	
 	# save_as - задайте полный путь, чтобы сделать копию файла под другим именем 
 	def backup(self, save_as=None):
+		if self._immutable:
+			return False
 		with self._obj:
 			if type(self._obj.value) is str:
 				string = self._obj.value
@@ -30,7 +33,7 @@ class AbstractStorageObject:
 
 	def restore(self):
 		string = self._read(self._path)
-		if string is None:
+		if not string:
 			return False
 		# чтение прошло успешно
 		with self._obj:
@@ -56,16 +59,48 @@ class IStorageManager:
 	def create_file(self, path, string=""):
 		pass
 
+	# create_storage_object
+	def _cso(self, path, immutable, default) -> AbstractStorageObject:
+		pass
+
 	def mkdir(self, path):
 		pass
 
 	def exists(self, path):
 		pass
 
-	# На основе существующего файла
-	def create_storage_object(self, path, is_json=True) -> AbstractStorageObject:
+	def get(self, path, is_json=True) -> AbstractStorageObject:
 		pass
 
-	cso = create_storage_object							# shortcut
+# ======== ========= ========= ========= ========= ========= ========= =========
+
+class AbstractStorageManager(IStorageManager):
+	_immutable_files = (
+		"events.json",
+		"auth.json"
+	)
+
+	def __init__(self):
+		self._storage_objects = SafeVariable({})
+
+	def get(self, path, is_json=True) -> AbstractStorageObject:
+		with self._storage_objects:
+			if path in self._storage_objects.value:
+				return self._storage_objects[path]
+		# Не было до этого запроса на получение этого файла.
+		# Проверим существование необязательных объектов (если это он)
+		immutable = path in self._immutable_files
+		if not immutable:
+			if not self.exists(path):
+				self.create_file(path)
+		# Создаем новый объект-хранения
+		default = ""
+		if is_json:
+			default = {}
+		storage_object = self._cso(path, immutable, default)
+		# Регистрируем его
+		with self._storage_objects:
+			self._storage_objects[path] = storage_object
+		return storage_object
 
 # ======== ========= ========= ========= ========= ========= ========= =========

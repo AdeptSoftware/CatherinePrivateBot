@@ -1,32 +1,7 @@
 # Класс, обновляющий различные данные
+from core.application  import Application
 import core.safe
-import datetime
 import asyncio
-
-# ======== ========= ========= ========= ========= ========= ========= =========
-
-def _default_on_error_handler(data=None): print("Error: " + str(data))
-
-G_ON_ERROR = _default_on_error_handler           # Глобальный обработчик событий
-G_TIMEZONE = 0                                   # Use: core.updater.G_TIMEZONE
-
-# ======== ========= ========= ========= ========= ========= ========= =========
-
-def time():
-    return datetime.datetime.now() + datetime.timedelta(hours=G_TIMEZONE)
-
-def timezone():
-    return G_TIMEZONE
-
-async def sleep(sec):
-    await asyncio.sleep(sec)
-
-# ======== ========= ========= ========= ========= ========= ========= =========
-
-async def error(data=None):
-    G_ON_ERROR(data)
-    await asyncio.sleep(1)
-    return False
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
@@ -64,7 +39,8 @@ class Updater:
         try:
             task[1] = await task[0]()
         except Exception as err:
-            task[1] = await error(err)
+            task[1] = await Application.on_error(err)
+            await asyncio.sleep(1)
 
     def stop(self):
         self._exit = True

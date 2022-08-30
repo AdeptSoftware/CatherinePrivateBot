@@ -1,9 +1,9 @@
-# Используемые команды приложением
+﻿# Используемые команды приложением
 import core.messenger.messenger     as _msgr
 import core.commands.command        as _cmd
 import core.commands.context        as _ctx
 import core.scripts.rand            as _rnd
-import core.updater                 as _upd
+import core.application             as _app
 import core.xlist                   as _x
 
 import appx.cls.dialogflow_command  as _dlg
@@ -82,12 +82,12 @@ async def date(ctx: _ctx.ContextEx):
                 delta = time_offset.index(word)-2
                 flag  = False
                 break
-        now  = _upd.time()+datetime.timedelta(days=delta)
-        plus = '+'*(_upd.G_TIMEZONE >= 0)
+        now  = _app.Application.time()+datetime.timedelta(days=delta)
+        plus = '+'*(_app.Application.timezone() >= 0)
         fmt = "%d/%m/%Y" + " %H:%M"*int(flag)
         ctx.data = now.strftime(fmt)
         if flag:
-            ctx.data += " (UTC {0}{1}:00)".format(plus, _upd.G_TIMEZONE)
+            ctx.data += f" (UTC {plus}{_app.Application.timezone()}:00)"
         return True
     return False
 
@@ -236,7 +236,7 @@ async def how_much(ctx: _ctx.ContextEx):
 
 async def when(ctx: _ctx.ContextEx):
     if ctx.msg.items.has_phrases(ctx.lang["#WHEN"]):
-        now = _upd.time()
+        now = _app.Application.time()
         delta = random.randint(120, 2820) # 2-47 ч.
         for word in ctx.msg.items:
             # оч важно чтобы word было словом иначе вылет без указания ошибки

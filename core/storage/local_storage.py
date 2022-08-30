@@ -24,10 +24,10 @@ class LocalStorageObject(AbstractStorageObject):
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 # Класс, управляющий локальным хранилищем.
-class LocalStorageManager(IStorageManager):
+class LocalStorageManager(AbstractStorageManager):
 	# path - относительный путь (по отношению к root)
 	def __init__(self, root):
-		self.cso = self.create_storage_object
+		super().__init__()
 		self._root = root
 
 	def create(self):
@@ -42,10 +42,7 @@ class LocalStorageManager(IStorageManager):
 	def exists(self, path):
 		return os.path.exists(self._root+path)
 
-	def create_storage_object(self, path, is_json=True) -> AbstractStorageObject:
-		if is_json:
-			return LocalStorageObject(self._root+path, {})
-		else:
-			return LocalStorageObject(self._root+path, "")
+	def _cso(self, path, immutable, default) -> AbstractStorageObject:
+		return LocalStorageObject(self._root+path, immutable, default)
 
 # ======== ========= ========= ========= ========= ========= ========= =========

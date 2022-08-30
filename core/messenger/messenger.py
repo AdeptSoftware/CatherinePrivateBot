@@ -1,7 +1,7 @@
 # Производные классы предназначены для организации цикла сообщений
-from core.commands.manager import CommandManager
-from core.commands.context import Context
-from core.updater          import error
+from core.commands.manager  import CommandManager
+from core.commands.context  import Context
+from core.application       import Application
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
@@ -17,12 +17,16 @@ class AbstractMessenger:
         data.updater.append(self._run)
 
     @staticmethod
-    async def _error(err, ctx):
+    async def _on_error(err, ctx):
         text = ""
         if ctx:
             text = ctx.msg.text.replace('\n', ' ')
             text = "{0}: \"{1}\"".format(ctx.msg.chat_id, text)
-        return await error(text or err)
+        return await Application.on_error(text or err)
+
+    @staticmethod
+    async def _on_message(ctx):
+        await Application.on_message(ctx)
 
     # Уникальный идентификатор (см. выше: Message Types)
     @property

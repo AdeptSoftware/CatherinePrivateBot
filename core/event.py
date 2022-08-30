@@ -1,6 +1,6 @@
 # Классы для работы с событиями
 from core.safe    import SafeVariable
-from core.updater import sleep
+import asyncio
 import time
 
 # ======== ========= ========= ========= ========= ========= ========= =========
@@ -85,6 +85,6 @@ class EventManager:
                 if deleted:
                     for name in deleted:
                         self._events.pop(name)
-            await sleep(self._delay)
+            await asyncio.sleep(self._delay)
 
 # ======== ========= ========= ========= ========= ========= ========= =========

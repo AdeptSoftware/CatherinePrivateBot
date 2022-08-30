@@ -1,5 +1,5 @@
 # Классы для работы с облачным хранилищем
-from core.storage.cls			import AbstractStorageObject, FILE_ENCODING
+from core.storage.cls			import *
 from core.wrappers.yandex_disk	import YandexDiskAPI
 from core.safe					import SafeVariable
 
@@ -8,9 +8,9 @@ from core.safe					import SafeVariable
 # Благодаря этому объекту, доступ к общим для потоков данных - безопасен
 # Все файлы, привязанные к таким объектам должны существовать на момент создания
 class YandexStorageObject(AbstractStorageObject):
-	def __init__(self, api, path, default):
+	def __init__(self, api, path, immutable, default):
 		self._api = api
-		super().__init__(path, default)
+		super().__init__(path, immutable, default)
 
 	def _read(self, path):
 		with self._api:
@@ -23,10 +23,10 @@ class YandexStorageObject(AbstractStorageObject):
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 # Класс, управляющий облачным хранилищем.
-class YandexStorageManager:
+class YandexStorageManager(AbstractStorageManager):
 	# path - относительный путь (по отношению к root)
 	def __init__(self, root, token):
-		self.cso	= self.create_storage_object
+		super().__init__()
 		self._token = token
 		self._root	= root
 		self._api	= None
@@ -48,10 +48,7 @@ class YandexStorageManager:
 		with self._api:
 			return self._api.exists(self._root+path)
 
-	def create_storage_object(self, path, is_json=True) -> AbstractStorageObject:
-		if is_json:
-			return YandexStorageObject(self._api, self._root+path, {})
-		else:
-			return YandexStorageObject(self._api, self._root+path, "")
+	def _cso(self, path, immutable, default) -> AbstractStorageObject:
+		return YandexStorageObject(self._api, self._root+path, immutable, default)
 			
 # ======== ========= ========= ========= ========= ========= ========= =========

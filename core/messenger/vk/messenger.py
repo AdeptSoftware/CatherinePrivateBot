@@ -61,8 +61,9 @@ class VkMessenger(AbstractMessenger):
                 )
                 if await ctx.mngr.on_message(ctx):
                     self.send(ctx.ans.get())
+                await self._on_message(ctx)
             except Exception as err:
-                await self._error(err, ctx)
+                await self._on_error(err, ctx)
 
     @property
     def type_id(self):

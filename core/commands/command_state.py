@@ -1,15 +1,15 @@
 #
 
-# Состояние команды
-STATE_ACCESS_DENIED       = -1            # Команда не доступна (исп. и тд)
-STATE_COOLDOWN            = 0             # Команда на откате
-STATE_LIMIT               = 1             # Достигнут лимит по использованию
-STATE_OVERLIMIT           = 2             # Кол-во исп. больше отметки лимита
-STATE_READY               = 3             # Команда доступна
+# РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјР°РЅРґС‹
+STATE_ACCESS_DENIED       = -1            # РљРѕРјР°РЅРґР° РЅРµ РґРѕСЃС‚СѓРїРЅР° (РёСЃРї. Рё С‚Рґ)
+STATE_COOLDOWN            = 0             # РљРѕРјР°РЅРґР° РЅР° РѕС‚РєР°С‚Рµ
+STATE_LIMIT               = 1             # Р”РѕСЃС‚РёРіРЅСѓС‚ Р»РёРјРёС‚ РїРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЋ
+STATE_OVERLIMIT           = 2             # РљРѕР»-РІРѕ РёСЃРї. Р±РѕР»СЊС€Рµ РѕС‚РјРµС‚РєРё Р»РёРјРёС‚Р°
+STATE_READY               = 3             # РљРѕРјР°РЅРґР° РґРѕСЃС‚СѓРїРЅР°
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
-# Определяет и управляет текущим состоянием команды
+# РћРїСЂРµРґРµР»СЏРµС‚ Рё СѓРїСЂР°РІР»СЏРµС‚ С‚РµРєСѓС‰РёРј СЃРѕСЃС‚РѕСЏРЅРёРµРј РєРѕРјР°РЅРґС‹
 class ICommandState:
     def new_state(self, node, user_id, now):
         pass
@@ -38,10 +38,10 @@ class ICommandState:
 
 class CommandState(ICommandState):
     def __init__(self, node, now):
-        self._node      = node         # Текущий ICommandNode
-        self._count     = 0            # Количество использований команды
-        self._prev      = 0            # Время предпоследнего вызова
-        self._last      = now          # Время последнего вызова
+        self._node      = node         # РўРµРєСѓС‰РёР№ ICommandNode
+        self._count     = 0            # РљРѕР»РёС‡РµСЃС‚РІРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёР№ РєРѕРјР°РЅРґС‹
+        self._prev      = 0            # Р’СЂРµРјСЏ РїСЂРµРґРїРѕСЃР»РµРґРЅРµРіРѕ РІС‹Р·РѕРІР°
+        self._last      = now          # Р’СЂРµРјСЏ РїРѕСЃР»РµРґРЅРµРіРѕ РІС‹Р·РѕРІР°
         self._users     = []
 
     def new_state(self, node, user_id, now):
@@ -67,15 +67,15 @@ class CommandState(ICommandState):
             elif self._count > self._node.limit+1:
                 return STATE_OVERLIMIT
         if (not self._node.limit and now != self._prev) or \
-           (self._node.limit and now != self._last):       # Только что изменено
+           (self._node.limit and now != self._last):       # РўРѕР»СЊРєРѕ С‡С‚Рѕ РёР·РјРµРЅРµРЅРѕ
             if self._node.cooldown and now < self._prev + self._node.cooldown:
                 return STATE_COOLDOWN
         return STATE_READY
 
-    # expired - возможно не совсем корректное название
-    # expired = now-remember_time из выражения: now < last+remember_time
+    # expired - РІРѕР·РјРѕР¶РЅРѕ РЅРµ СЃРѕРІСЃРµРј РєРѕСЂСЂРµРєС‚РЅРѕРµ РЅР°Р·РІР°РЅРёРµ
+    # expired = now-remember_time РёР· РІС‹СЂР°Р¶РµРЅРёСЏ: now < last+remember_time
     def update(self, expired):
-        # Если вернет False, то состояние будет удалено. Пользователь молчит
+        # Р•СЃР»Рё РІРµСЂРЅРµС‚ False, С‚Рѕ СЃРѕСЃС‚РѕСЏРЅРёРµ Р±СѓРґРµС‚ СѓРґР°Р»РµРЅРѕ. РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РјРѕР»С‡РёС‚
         return expired < self._last
 
     @property

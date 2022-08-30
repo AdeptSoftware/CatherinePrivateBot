@@ -1,6 +1,6 @@
 #
-from core.updater 	import timezone
-from core.event		import Event
+from core.application 	import Application
+from core.event			import Event
 import datetime
 
 # ======== ========= ========= ========= ========= ========= ========= =========
@@ -25,7 +25,7 @@ def timetable(event: Event):
 		event.reserve = None
 	# Определение времени отправки следующего сообщения (z)
 	days = 0
-	offset = timezone()+data["h_offset"]
+	offset = Application.timezone()+data["h_offset"]
 	now = datetime.datetime.now() + datetime.timedelta(hours=offset)
 	while days < 8:			# Неделя+1
 		for msg in data["lst"]:
@@ -45,13 +45,13 @@ def timetable(event: Event):
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
-def loader(app, filename="events.json"):
+def loader(app, filename):
 	""" Загрузчик событий из json-файла
 
 	:param app: :class:`core.commands.context.CommonData`
 	:param filename: откуда загружаем события
 	"""
-	data = app.storage.create_storage_object(filename).get()
+	data = app.storage.get(filename).get()
 	with data:
 		for event in data.value:
 			if event["type"] == TYPE_TIMETABLE:
