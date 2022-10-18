@@ -22,10 +22,11 @@ def upload_dir(src_path, dst_path):
             api.upload(src_path + name, dst_path + name, overwrite=True)
             print("READY: " + dst_path + name)
 
+
 # ======== ========= ========= ========= ========= ========= ========= =========
 
 # Загрузка данных
-with open("../data.json", 'r') as f:
+with open("../_data.json", 'r') as f:
     data = json.loads(f.read())
 # Инициализация
 api = yadisk.YaDisk(token=data["token"])

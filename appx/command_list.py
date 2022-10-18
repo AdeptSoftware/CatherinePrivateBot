@@ -6,6 +6,8 @@ import core.scripts.rand            as _rnd
 import core.application             as _app
 import core.xlist                   as _x
 
+import appx.extended.vainglory      as _vg
+
 import appx.cls.dialogflow_command  as _dlg
 import appx.scripts.convert         as _conv
 import appx.scripts.maps            as _maps
@@ -14,6 +16,7 @@ import appx.cls.calc                as _calc
 import datetime
 import aiohttp
 import random
+import re
 
 # ======== ========= ========= ========= ========= ========= ========= =========
 
@@ -23,7 +26,7 @@ async def hello(ctx: _ctx.ContextEx):
 async def goodbye(ctx: _ctx.ContextEx):
     if ctx.msg.items:
         return ctx.msg.items.has_phrases(ctx.lang["#GOODBYE"]) or \
-               ctx.msg.items[0].lower in ctx.lang["$GOODBYE2"]
+              (ctx.msg.items[0].lower in ctx.lang["$GOODBYE2"] and len(ctx.msg.items) == 1)
     return False
     # Проблема слова "пока" в том, что оно не только обозначает прощание...
 
@@ -278,6 +281,26 @@ async def knock_any(ctx: _ctx.ContextEx):
     return ctx is not None
 
 # ======== ========= ========= ========= ========= ========= ========= =========
+
+async def vg_elo(ctx: _ctx.ContextEx, average=1200):
+    if ctx.msg.items:
+        if ctx.msg.items[0].lower in ctx.lang["$VG_ELO"] and len(ctx.msg.items) == 2:
+            values = re.findall(r"\d+", ctx.msg.items[1].text)
+            if len(values) == 2:
+                values = (int(values[0]), int(values[1]))
+                result = _vg.generate(values[0], values[1])
+                if result:
+                    if values[0] == 0 or values[1] == 0:
+                        ctx.data = ", ".join([str(x) for x in result[0] or result[1]])
+                    else:
+                        ctx.data = "[Team 1]: " + ", ".join([str(x) for x in result[0]]) + '\n' + \
+                                   "[Team 2]: " + ", ".join([str(x) for x in result[1]])
+                else:
+                    ctx.data = ctx.lang["=VG_ELO"]
+            return True
+    return False
+
+# ======== ========= ========= ========= ========= ========= ========= =========
 # Answer_key - ключи в json-файле, хранящем строки локализации
 # Если перед именем стоит символ:
 #   $ - Содержит список строк (слов), не требующих разбивание на слова
@@ -328,6 +351,8 @@ def attach():
     _cmd.new(knock_0,   "=KNOCK",     0, 1, _cmd.ACCESS_PERSONAL, 20, name="KnockKnock", nodes=[
         _cmd.CommandNode(knock_any, "=KNOCK_ANY", 20, 0)
     ])
+    # Специфическое
+    _cmd.new(vg_elo,    _set,         0, 0, _cmd.ACCESS_PERSONAL,     name="VaingloryELO")
     # Общие вопросы:
     _cmd.new(how_much,  _set,         0, 0, _cmd.ACCESS_PERSONAL,     name="HowMuch")
     _cmd.new(where,     _where,       0, 0, _cmd.ACCESS_PERSONAL,     name="Where")
